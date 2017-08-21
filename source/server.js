@@ -43,6 +43,19 @@ if (!fs.existsSync(CONFIG_PATH)) throw new Error(`Config not found: ${CONFIG_PAT
 const config = require(CONFIG_PATH);
 const { name, version } = require('../package.json');
 
+const jwtOptions = {
+  secret: process.env.JWT_SECRET,
+  getToken: (req) => {
+    if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+      return req.headers.authorization.split(' ')[1];
+    } else if (req.query && req.query.token) {
+      return req.query.token;
+    } else if (req.cookies && req.cookies.token) {
+      return req.query.token;
+    }
+    return null;
+  },
+};
 
 const PORT = process.env.PORT || 3005;
 const server = restify.createServer({ name, version });
@@ -54,6 +67,15 @@ server.use(cookieParser.parse);
 server.use(validator());
 
 server.pre((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.charSet('utf-8');
+  return next();
+});
+
+server.use((req, res, next) => {
   if (
     req.cookies === undefined ||
     req.cookies.token === undefined
@@ -64,24 +86,14 @@ server.pre((req, res, next) => {
   return next();
 });
 
-server.pre((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.charSet('utf-8');
-  return next();
-});
-
 // Collection
 
 server.get(
   '/',
-  jwt({ secret: 'secret' }),
+  jwt(jwtOptions),
   async (req, res) => {
     try {
       const result = await users.getUsers();
-      console.log(result);
       res.status(200);
       res.send(result).end();
     } catch (error) {
@@ -93,10 +105,11 @@ server.get(
 server.post({
   path: '/',
   validation: userValidation,
-}, async (req, res) => {
+},
+jwt(jwtOptions),
+async (req, res) => {
   try {
     const result = await users.createUser(req.body);
-    console.log(result);
     res.status(201);
     res.send(result).end();
   } catch (error) {
@@ -107,26 +120,33 @@ server.post({
 
 // User
 
-server.put('/:id', (req, res, next) => {
-  res.status(200);
-  res.send('user replaced or created').end();
-});
+server.put('/:id',
+  jwt(jwtOptions),
+  (req, res) => {
+    res.status(200);
+    res.send('user replaced or created').end();
+  });
 
-server.patch('/:id', (req, res, next) => {
-  res.status(200);
-  res.send('user updated').end();
-});
+server.patch('/:id',
+  jwt(jwtOptions),
+  (req, res) => {
+    res.status(200);
+    res.send('user updated').end();
+  });
 
-server.get('/:id', (req, res, next) => {
-  console.log(req.params.id);
-  res.status(200);
-  res.send('user').end();
-});
+server.get('/:id',
+  jwt(jwtOptions),
+  (req, res) => {
+    res.status(200);
+    res.send('user').end();
+  });
 
-server.del('/:id', (req, res, next) => {
-  res.status(200);
-  res.send('user deleted').end();
-});
+server.del('/:id',
+  jwt(jwtOptions),
+  (req, res) => {
+    res.status(200);
+    res.send('user deleted').end();
+  });
 
 (async () => {
   users = new Users(`mongodb://${config.mongoDBHost}:${config.mongoDBPort}/${config.mongoDBName}`);
