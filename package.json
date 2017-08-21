@@ -1,0 +1,35 @@
+{
+  "name": "users_frontender_magazine",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Users Frontender Magazine",
+  "keywords": [],
+  "author": "Anton Nemtsev",
+  "license": "CC",
+  "main": "server.js",
+  "dependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-preset-stage-1": "^6.24.1",
+    "babel-preset-stage-2": "^6.24.1",
+    "babel-preset-stage-3": "^6.24.1",
+    "dotenv": "^4.0.0",
+    "file-exists": "^4.0.0",
+    "fs": "0.0.1-security",
+    "joi": "^10.6.0",
+    "mongodb": "^2.2.31",
+    "restify": "^4.0.2",
+    "restify-cookies": "^0.2.2",
+    "restify-joi-middleware": "^3.0.0",
+    "restify-jwt": "^0.4.0",
+    "restify-mongoose": "^2.0.1"
+  },
+  "scripts": {
+    "start": "node ./build/server.js",
+    "build": "babel source --minified -s true -d build --ignore __tests__/**,__mocks__/**",
+    "watch": "babel source --watch --minified -s true -d build --ignore __tests__/**,__mocks__/**"
+  }
+}
