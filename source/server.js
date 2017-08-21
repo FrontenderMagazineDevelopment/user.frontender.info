@@ -58,7 +58,8 @@ server.pre((req, res, next) => {
     req.cookies === undefined ||
     req.cookies.token === undefined
   ) {
-    res.redirect(302, config.authURL, next);
+    res.status(401);
+    res.end();
   }
   return next();
 });
