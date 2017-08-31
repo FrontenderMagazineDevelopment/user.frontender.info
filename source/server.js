@@ -1,4 +1,5 @@
 import 'babel-polyfill';
+import mongoose from 'mongoose';
 import restify from 'restify';
 import joi from 'joi';
 import jwt from 'restify-jwt';
@@ -7,9 +8,9 @@ import dotenv from 'dotenv';
 import fs from 'fs';
 import { resolve } from 'path';
 import validator from 'restify-joi-middleware';
-import Users from './Users';
 
-let users;
+import Users from './models/Users';
+
 const userValidation = {
   body: joi.object().keys({
     name: joi.string().required(),
@@ -32,6 +33,7 @@ const userValidation = {
   }).required(),
 };
 
+
 const ENV_PATH = resolve(__dirname, '../../.env');
 const CONFIG_DIR = '../config/';
 const CONFIG_PATH = resolve(__dirname, `${CONFIG_DIR}application.${(process.env.NODE_ENV || 'local')}.json`);
@@ -51,7 +53,7 @@ const jwtOptions = {
     } else if (req.query && req.query.token) {
       return req.query.token;
     } else if (req.cookies && req.cookies.token) {
-      return req.query.token;
+      return req.cookies.token;
     }
     return null;
   },
@@ -86,20 +88,18 @@ server.use((req, res, next) => {
   return next();
 });
 
-// Collection
-
 server.get(
   '/',
   jwt(jwtOptions),
   async (req, res) => {
-    try {
-      const result = await users.getUsers();
-      res.status(200);
-      res.send(result).end();
-    } catch (error) {
-      res.status(500);
-      res.send(error).end();
+    if (req.user.scope.isOwner === false) {
+      res.status(401);
+      res.end();
     }
+    const result = await Users.find();
+    res.status(200);
+    res.send(result);
+    res.end();
   });
 
 server.post({
@@ -108,13 +108,21 @@ server.post({
 },
 jwt(jwtOptions),
 async (req, res) => {
+  if (req.user.scope.isOwner === false) {
+    res.status(401);
+    res.end();
+  }
+
   try {
-    const result = await users.createUser(req.body);
-    res.status(201);
-    res.send(result).end();
+    const user = new Users(req.params);
+    const result = await user.save();
+    res.status(200);
+    res.send(result);
+    res.end();
   } catch (error) {
     res.status(500);
-    res.send(error).end();
+    res.send(error.message);
+    res.end();
   }
 });
 
@@ -123,6 +131,10 @@ async (req, res) => {
 server.put('/:id',
   jwt(jwtOptions),
   (req, res) => {
+    if (req.user.scope.isTeam === false) {
+      res.status(401);
+      res.end();
+    }
     res.status(200);
     res.send('user replaced or created').end();
   });
@@ -130,6 +142,10 @@ server.put('/:id',
 server.patch('/:id',
   jwt(jwtOptions),
   (req, res) => {
+    if (req.user.scope.isTeam === false) {
+      res.status(401);
+      res.end();
+    }
     res.status(200);
     res.send('user updated').end();
   });
@@ -137,6 +153,10 @@ server.patch('/:id',
 server.get('/:id',
   jwt(jwtOptions),
   (req, res) => {
+    if (req.user.scope.isTeam === false) {
+      res.status(401);
+      res.end();
+    }
     res.status(200);
     res.send('user').end();
   });
@@ -144,12 +164,16 @@ server.get('/:id',
 server.del('/:id',
   jwt(jwtOptions),
   (req, res) => {
+    if (req.user.scope.isOwner === false) {
+      res.status(401);
+      res.end();
+    }
     res.status(200);
     res.send('user deleted').end();
   });
 
 (async () => {
-  users = new Users(`mongodb://${config.mongoDBHost}:${config.mongoDBPort}/${config.mongoDBName}`);
-  await users.connect();
+  mongoose.Promise = global.Promise;
+  await mongoose.connect(`mongodb://${config.mongoDBHost}:${config.mongoDBPort}/${config.mongoDBName}`, { useMongoClient: true });
   server.listen(PORT);
 })();

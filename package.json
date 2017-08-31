@@ -21,6 +21,7 @@
     "fs": "0.0.1-security",
     "joi": "^10.6.0",
     "mongodb": "^2.2.31",
+    "mongoose": "^4.11.7",
     "restify": "^4.0.2",
     "restify-cookies": "^0.2.2",
     "restify-joi-middleware": "^3.0.0",

@@ -17,6 +17,7 @@ cd ${WEB_PATH};
 tar -xzf ./${ARCH_NAME} -C ./;
 rm ./${ARCH_NAME};
 ls -dt ${WEB_PATH}*/ | tail -n +5 | xargs rm -rf;
+rm ./.env
 if [ ! -f ".env" ]; then
     echo USER_SERVICE_SECRET=${USER_SERVICE_SECRET} >> .env;
     echo USER_SERVICE_OPEN=${USER_SERVICE_OPEN} >> .env;
