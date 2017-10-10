@@ -11,12 +11,17 @@ import validator from 'restify-joi-middleware';
 
 import Users from './models/Users';
 
-const userValidation = {
+const userPOSTValidation = {
   body: joi.object().keys({
     name: joi.string().required(),
 
     avatar: joi.string().uri(),
     twitter: joi.string(),
+    github: joi.when('team', {
+      is: true,
+      then: joi.string().required(),
+      otherwise: joi.string(),
+    }),
     blog: joi.string().uri(),
     email: joi.string().email(),
     trello: joi.string(),
@@ -33,11 +38,24 @@ const userValidation = {
   }).required(),
 };
 
+const userPUTValidation = userPOSTValidation;
+
+const userPATCHValidation = {
+  body: joi.object().keys({
+    name: joi.string().required(),
+
+    avatar: joi.string().uri(),
+    twitter: joi.string(),
+    blog: joi.string().uri(),
+    github: joi.string().required(),
+    email: joi.string().email(),
+    trello: joi.string(),
+  }).required(),
+};
 
 const ENV_PATH = resolve(__dirname, '../../.env');
 const CONFIG_DIR = '../config/';
 const CONFIG_PATH = resolve(__dirname, `${CONFIG_DIR}application.${(process.env.NODE_ENV || 'local')}.json`);
-
 if (!fs.existsSync(ENV_PATH)) throw new Error('Envirnment files not found');
 dotenv.config({ path: ENV_PATH });
 
@@ -59,7 +77,7 @@ const jwtOptions = {
   },
 };
 
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT || 3055;
 const server = restify.createServer({ name, version });
 server.use(restify.plugins.acceptParser(server.acceptable));
 server.use(restify.plugins.queryParser());
@@ -91,85 +109,213 @@ server.use((req, res, next) => {
 server.get(
   '/',
   jwt(jwtOptions),
-  async (req, res) => {
+  async (req, res, next) => {
     if (req.user.scope.isOwner === false) {
       res.status(401);
       res.end();
+      return next();
     }
+
+    if (req.url === '/favicon.ico') {
+      res.state(204);
+      res.end();
+      return next();
+    }
+
     const result = await Users.find();
     res.status(200);
     res.send(result);
     res.end();
+    return next();
   });
 
 server.post({
   path: '/',
-  validation: userValidation,
+  validation: userPOSTValidation,
 },
 jwt(jwtOptions),
-async (req, res) => {
+async (req, res, next) => {
   if (req.user.scope.isOwner === false) {
     res.status(401);
     res.end();
+    return next();
   }
 
+  const user = new Users(req.params);
+  let result;
   try {
-    const user = new Users(req.params);
-    const result = await user.save();
-    res.status(200);
-    res.send(result);
-    res.end();
+    result = await user.save();
   } catch (error) {
-    res.status(500);
+    res.status(400);
     res.send(error.message);
     res.end();
+    return next();
   }
+
+  res.link('Location', `${config}${result._id}`);
+  res.header('content-type', 'json');
+  res.status(201);
+  res.send(result);
+  res.end();
+  return next();
 });
 
 // User
 
-server.put('/:id',
+/**
+ * Replace user by id
+ * @type {String} id - user id
+ */
+server.put({
+  path: '/:id',
+  validation: userPUTValidation,
+},
   jwt(jwtOptions),
-  (req, res) => {
-    if (req.user.scope.isTeam === false) {
-      res.status(401);
-      res.end();
-    }
-    res.status(200);
-    res.send('user replaced or created').end();
-  });
-
-server.patch('/:id',
-  jwt(jwtOptions),
-  (req, res) => {
-    if (req.user.scope.isTeam === false) {
-      res.status(401);
-      res.end();
-    }
-    res.status(200);
-    res.send('user updated').end();
-  });
-
-server.get('/:id',
-  jwt(jwtOptions),
-  (req, res) => {
-    if (req.user.scope.isTeam === false) {
-      res.status(401);
-      res.end();
-    }
-    res.status(200);
-    res.send('user').end();
-  });
-
-server.del('/:id',
-  jwt(jwtOptions),
-  (req, res) => {
+  (req, res, next) => {
     if (req.user.scope.isOwner === false) {
       res.status(401);
       res.end();
+      return next();
     }
     res.status(200);
-    res.send('user deleted').end();
+
+    const result = Users.replaceOne({ _id: req.params.id }, req.params);
+
+    console.log(result);
+
+    if (!result.result.ok) {
+      res.status(500);
+      res.end();
+      return next();
+    }
+
+    if (!result.result.n) {
+      res.status(404);
+      res.end();
+      return next();
+    }
+
+    res.send('user replaced or created');
+    res.end();
+    return next();
+  });
+
+/**
+ * Edit user by id
+ * @type {String} id - user id
+ */
+server.patch({
+  path: '/:id',
+  validation: userPATCHValidation,
+},
+  jwt(jwtOptions),
+  async (req, res, next) => {
+    if (req.user.scope.isTeam === false) {
+      res.status(401);
+      res.end();
+      return next();
+    }
+
+    if (req.user.scope.login.toLowerCase() !== req.params.github.toLowerCase()) {
+      res.status(401);
+      res.end();
+      return next();
+    }
+
+    const result = await Users.updateOne({ _id: req.params.id }, req.params);
+
+    if (!result.ok) {
+      res.status(500);
+      res.end();
+      return next();
+    }
+
+    if (!result.n) {
+      res.status(404);
+      res.end();
+      return next();
+    }
+
+    let user;
+    try {
+      user = await Users.findById(req.params.id);
+    } catch (error) {
+      res.status(404);
+      res.end();
+      return next();
+    }
+
+    res.status(200);
+    res.send(user);
+    res.end();
+    return next();
+  });
+
+/**
+ * Get user by ID
+ * @type {String} id - user id
+ * @return {Object} - user
+ */
+server.get('/:id',
+  jwt(jwtOptions),
+  async (req, res, next) => {
+    if (req.params.id === 'favicon.ico') {
+      res.status(204);
+      res.end();
+      return next();
+    }
+
+    if (req.user.scope.isTeam === false) {
+      res.status(401);
+      res.end();
+      return next();
+    }
+
+    let result;
+    try {
+      result = await Users.findById(req.params.id);
+    } catch (error) {
+      res.status(404);
+      res.end();
+      return next();
+    }
+
+    res.status(200);
+    res.send(result);
+    res.end();
+    return next();
+  });
+
+/**
+ * Remove user by ID
+ * @type {String} - user id
+ */
+server.del('/:id',
+  jwt(jwtOptions),
+  async (req, res, next) => {
+    if (req.user.scope.isOwner === false) {
+      res.status(401);
+      res.end();
+      return next();
+    }
+
+    const result = await Users.remove({ _id: req.params.id });
+
+    if (!result.result.ok) {
+      res.status(500);
+      res.end();
+      return next();
+    }
+
+    if (!result.result.n) {
+      res.status(404);
+      res.end();
+      return next();
+    }
+
+    res.status(204);
+    res.end();
+    return next();
   });
 
 (async () => {

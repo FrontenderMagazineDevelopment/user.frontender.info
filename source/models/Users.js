@@ -8,6 +8,7 @@ const UserSchema = new mongoose.Schema({
   twitter: { type: String },
   blog: { type: String },
   email: { type: String },
+  github: { type: String },
   trello: { type: String },
 
   team: { type: Boolean },
