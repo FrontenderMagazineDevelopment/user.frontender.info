@@ -114,7 +114,9 @@ server.use((req, res, next) => {
 
 server.get('/', jwt(jwtOptions), async (req, res, next) => {
 
-  console.log(`user: ${req.user}`);
+  console.log(req.user);
+
+  console.log(req.user.scope);
 
   if (req.user.scope.isOwner === false) {
     res.status(401);
