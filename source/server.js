@@ -75,7 +75,6 @@ const { name, version } = require('../package.json');
 const jwtOptions = {
   secret: process.env.JWT_SECRET,
   getToken: req => {
-    console.log('auth: ', req.headers.authorization);
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
       return req.headers.authorization.split(' ')[1];
     } else if (req.query && req.query.token) {
@@ -115,7 +114,7 @@ server.use((req, res, next) => {
 
 server.get('/', jwt(jwtOptions), async (req, res, next) => {
 
-  res.send(`user: ${req.user}`);
+  console.log(`user: ${req.user}`);
 
   if (req.user.scope.isOwner === false) {
     res.status(401);
