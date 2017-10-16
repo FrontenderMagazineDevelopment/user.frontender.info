@@ -132,7 +132,7 @@ server.get('/', jwt(jwtOptions), async (req, res, next) => {
   return next();
 });
 
-server.option('/', jwt(jwtOptions), async (req, res, next) => {
+server.opts('/', jwt(jwtOptions), async (req, res, next) => {
   if (req.user.scope.isOwner === false) {
     res.status(401);
     res.end();
@@ -176,7 +176,7 @@ server.post(
   },
 );
 
-server.option(
+server.opts(
   {
     path: '/',
     validation: userPOSTValidation,
@@ -352,7 +352,7 @@ server.del('/:id', jwt(jwtOptions), async (req, res, next) => {
   return next();
 });
 
-server.option('/:id', jwt(jwtOptions), async (req, res, next) => {
+server.opts('/:id', jwt(jwtOptions), async (req, res, next) => {
   if (req.user.scope.isOwner === false) {
     res.status(401);
     res.end();
