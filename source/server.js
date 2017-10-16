@@ -75,6 +75,7 @@ const { name, version } = require('../package.json');
 const jwtOptions = {
   secret: process.env.JWT_SECRET,
   getToken: req => {
+    console.log('auth: ', req.headers.authorization);
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
       return req.headers.authorization.split(' ')[1];
     } else if (req.query && req.query.token) {
