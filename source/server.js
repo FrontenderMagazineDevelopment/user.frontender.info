@@ -113,16 +113,11 @@ server.use((req, res, next) => {
 });
 
 server.get('/', jwt(jwtOptions), async (req, res, next) => {
-
-  console.log('yep, we got auth');
-
   if (req.user.scope.isOwner === false) {
     res.status(401);
     res.end();
     return next();
   }
-
-  console.log('yep, isOwner');
 
   if (req.url === '/favicon.ico') {
     res.state(204);
@@ -130,9 +125,10 @@ server.get('/', jwt(jwtOptions), async (req, res, next) => {
     return next();
   }
 
-  console.log('nope, not favicon');
-
   const result = await Users.find();
+
+  console.log(result);
+
   res.status(200);
   res.send(result);
   res.end();
@@ -212,8 +208,6 @@ server.put(
     res.status(200);
 
     const result = Users.replaceOne({ _id: req.params.id }, req.params);
-
-    console.log(result);
 
     if (!result.result.ok) {
       res.status(500);
