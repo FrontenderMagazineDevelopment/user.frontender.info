@@ -114,9 +114,7 @@ server.use((req, res, next) => {
 
 server.get('/', jwt(jwtOptions), async (req, res, next) => {
 
-  console.log(req.user);
-
-  console.log(req.user.scope);
+  console.log('yep, we got auth');
 
   if (req.user.scope.isOwner === false) {
     res.status(401);
@@ -124,11 +122,15 @@ server.get('/', jwt(jwtOptions), async (req, res, next) => {
     return next();
   }
 
+  console.log('yep, isOwner');
+
   if (req.url === '/favicon.ico') {
     res.state(204);
     res.end();
     return next();
   }
+
+  console.log('nope, not favicon');
 
   const result = await Users.find();
   res.status(200);
