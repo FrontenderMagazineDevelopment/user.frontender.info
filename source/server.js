@@ -133,11 +133,6 @@ server.get('/', jwt(jwtOptions), async (req, res, next) => {
 });
 
 server.opts('/', jwt(jwtOptions), async (req, res, next) => {
-  if (req.user.scope.isOwner === false) {
-    res.status(401);
-    res.end();
-    return next();
-  }
   res.status(200);
   res.end();
   return next();
@@ -183,11 +178,6 @@ server.opts(
   },
   jwt(jwtOptions),
   async (req, res, next) => {
-    if (req.user.scope.isOwner === false) {
-      res.status(401);
-      res.end();
-      return next();
-    }
     res.status(200);
     res.end();
     return next();
@@ -353,11 +343,6 @@ server.del('/:id', jwt(jwtOptions), async (req, res, next) => {
 });
 
 server.opts('/:id', jwt(jwtOptions), async (req, res, next) => {
-  if (req.user.scope.isOwner === false) {
-    res.status(401);
-    res.end();
-    return next();
-  }
   res.status(200);
   res.end();
   return next();
