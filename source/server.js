@@ -127,10 +127,8 @@ server.get('/', jwt(jwtOptions), async (req, res, next) => {
 
   const result = await Users.find();
 
-  console.log(result);
-
   res.status(200);
-  res.send(result);
+  res.send(JSON.stringify(result));
   res.end();
   return next();
 });
