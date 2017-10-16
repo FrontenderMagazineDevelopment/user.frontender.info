@@ -1,9 +1,8 @@
-const MongoClient = require('mongodb').MongoClient;
+const { MongoClient } = require('mongodb');
 
 const COLLECTION_NAME = 'users';
 
 export default class Users {
-
   constructor(url) {
     this.url = url;
   }
@@ -13,21 +12,13 @@ export default class Users {
     this.cl = this.db.collection(COLLECTION_NAME);
   }
 
-  getUser(id) {
-
-  }
-
-  replaceUser(id) {
-
-  }
-
-  updateUser(id) {
-
-  }
-
-  deleteUser(id) {
-
-  }
+  // getUser(id) {}
+  //
+  // replaceUser(id) {}
+  //
+  // updateUser(id) {}
+  //
+  // deleteUser(id) {}
 
   async createUser(user) {
     const result = await this.cl.insertOne(user);
@@ -39,12 +30,7 @@ export default class Users {
     return result;
   }
 
-  ifInGroup() {
-
-  }
-
-  ifOwner() {
-
-  }
-
+  // ifInGroup() {}
+  //
+  // ifOwner() {}
 }
