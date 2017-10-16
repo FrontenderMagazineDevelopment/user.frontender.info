@@ -118,25 +118,21 @@ server.get('/', jwt(jwtOptions), async (req, res, next) => {
     res.end();
     return next();
   }
-
   if (req.url === '/favicon.ico') {
     res.state(204);
     res.end();
     return next();
   }
-
   const result = await Users.find();
-
   res.status(200);
   res.send(JSON.stringify(result));
   res.end();
-  return next();
+  return true;
 });
 
-server.opts('/', jwt(jwtOptions), async (req, res, next) => {
+server.opts('/', jwt(jwtOptions), async (req, res) => {
   res.status(200);
   res.end();
-  return next();
 });
 
 server.post(
