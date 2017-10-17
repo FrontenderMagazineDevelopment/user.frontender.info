@@ -104,14 +104,6 @@ server.pre((req, res, next) => {
   return next();
 });
 
-server.use((req, res, next) => {
-  if (req.cookies === undefined || req.cookies.token === undefined) {
-    res.status(401);
-    res.end();
-  }
-  return next();
-});
-
 server.get('/', jwt(jwtOptions), async (req, res, next) => {
   if (req.user.scope.isOwner === false) {
     res.status(401);
