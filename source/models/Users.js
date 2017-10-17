@@ -1,24 +1,24 @@
 import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  name: { type: String, required: true },
+  name: { type: String, required: true, text : true },
 
-  avatar: { type: String },
-  twitter: { type: String },
-  blog: { type: String },
-  email: { type: String },
-  github: { type: String },
-  trello: { type: String },
+  avatar: { type: String, default: null },
+  twitter: { type: String, default: null },
+  blog: { type: String, default: null },
+  email: { type: String, default: null },
+  github: { type: String, default: null },
+  trello: { type: String, default: null },
 
-  team: { type: Boolean },
-  core: { type: Boolean },
+  team: { type: Boolean, default: false },
+  core: { type: Boolean, default: false },
 
-  translator: { type: Boolean },
-  editor: { type: Boolean },
-  developer: { type: Boolean },
-  author: { type: Boolean },
+  translator: { type: Boolean, default: false },
+  editor: { type: Boolean, default: false },
+  developer: { type: Boolean, default: false },
+  author: { type: Boolean, default: false },
 
-  salary: { type: Number },
+  salary: { type: Number, default: null },
 });
 
 const User = mongoose.model('users', UserSchema);

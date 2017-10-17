@@ -122,11 +122,6 @@ server.get('/', jwt(jwtOptions), async (req, res, next) => {
   return true;
 });
 
-server.opts('/', jwt(jwtOptions), async (req, res) => {
-  res.status(200);
-  res.end();
-});
-
 server.post(
   {
     path: '/',
@@ -155,19 +150,6 @@ server.post(
     res.header('content-type', 'json');
     res.status(201);
     res.send(result);
-    res.end();
-    return next();
-  },
-);
-
-server.opts(
-  {
-    path: '/',
-    validation: userPOSTValidation,
-  },
-  jwt(jwtOptions),
-  async (req, res, next) => {
-    res.status(200);
     res.end();
     return next();
   },
@@ -329,10 +311,14 @@ server.del('/:id', jwt(jwtOptions), async (req, res, next) => {
   return next();
 });
 
-server.opts('/:id', jwt(jwtOptions), async (req, res, next) => {
+server.opts('/:id', jwt(jwtOptions), async (req, res) => {
   res.status(200);
   res.end();
-  return next();
+});
+
+server.opts('/', jwt(jwtOptions), async (req, res) => {
+  res.status(200);
+  res.end();
 });
 
 (async () => {
