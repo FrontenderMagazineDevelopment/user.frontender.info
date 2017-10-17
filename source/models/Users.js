@@ -3,6 +3,13 @@ import mongoose from 'mongoose';
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true, text : true },
 
+  avatar: { type: String },
+  github: { type: String },
+  twitter: { type: String },
+  blog: { type: String },
+  trello: { type: String },
+  email: { type: String },
+
   team: { type: Boolean, default: false },
   core: { type: Boolean, default: false },
 

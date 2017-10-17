@@ -211,29 +211,39 @@ server.put(
     validation: userPUTValidation,
   },
   jwt(jwtOptions),
-  (req, res, next) => {
+  async (req, res, next) => {
+
     if (req.user.scope.isOwner === false) {
       res.status(401);
       res.end();
       return next();
     }
-    res.status(200);
 
-    const result = Users.replaceOne({ _id: req.params.id }, req.params);
+    const result = await Users.replaceOne({ _id: req.params.id }, req.params);
 
-    if (!result.result.ok) {
+    if (!result.ok) {
       res.status(500);
       res.end();
       return next();
     }
 
-    if (!result.result.n) {
+    if (!result.n) {
       res.status(404);
       res.end();
       return next();
     }
 
-    res.send('user replaced or created');
+    let user;
+    try {
+      user = await Users.findById(req.params.id);
+    } catch (error) {
+      res.status(404);
+      res.end();
+      return next();
+    }
+
+    res.status(200);
+    res.send(user);
     res.end();
     return next();
   },
@@ -256,7 +266,10 @@ server.patch(
       return next();
     }
 
-    if (req.user.scope.login.toLowerCase() !== req.params.github.toLowerCase()) {
+    if (
+      (req.user.scope.isOwner === false)
+      && (req.user.scope.login.toLowerCase() !== req.params.github.toLowerCase())
+    ) {
       res.status(401);
       res.end();
       return next();
