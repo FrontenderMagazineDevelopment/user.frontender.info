@@ -1,5 +1,4 @@
 {
-  "authURL": "//token.frontender.info/auth/",
   "collectionName": "users",
   "mongoDBHost": "localhost",
   "mongoDBPort": 27017,
