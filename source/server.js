@@ -140,7 +140,6 @@ server.use(cookieParser.parse);
 server.use(validator());
 
 server.pre((req, res, next) => {
-  res.setHeader('Expires:', '-1');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type,Authorization');
