@@ -1,118 +1,29 @@
-import 'babel-polyfill';
+import { existsSync } from 'fs';
 import mongoose from 'mongoose';
 import restify from 'restify';
-import joi from 'joi';
-import jwt from 'restify-jwt';
-import cookieParser from 'restify-cookies';
-import dotenv from 'dotenv';
-import fs from 'fs';
-import { resolve } from 'path';
+import errors from 'restify-errors';
+import jwt from 'restify-jwt-community';
 import validator from 'restify-joi-middleware';
+import cookieParser from 'restify-cookies';
+import dotenv from 'dotenv-safe';
+import { resolve } from 'path';
 
 import Users from './models/Users';
+import {
+  userPATCHValidation,
+  userPUTValidation,
+  userPOSTValidation
+} from './validation';
 
-const userPOSTValidation = {
-  body: joi
-    .object()
-    .keys({
-      name: joi.string().required(),
-
-      avatar: joi.string().uri(),
-      twitter: joi.string(),
-      github: joi.when('team', {
-        is: true,
-        then: joi.string().required(),
-        otherwise: joi.string(),
-      }),
-      blog: joi.string().uri(),
-      email: joi.string().email(),
-      trello: joi.string(),
-
-      team: joi.boolean().default(false),
-      core: joi.boolean().default(false),
-
-      translator: joi.boolean().default(false),
-      editor: joi.boolean().default(false),
-      developer: joi.boolean().default(false),
-      author: joi.boolean().default(false),
-
-      salary: joi.number(),
-    })
-    .required(),
-};
-
-const userPUTValidation = {
-  body: joi
-    .object()
-    .keys({
-      name: joi.string().required(),
-
-      avatar: joi.string().uri(),
-      twitter: joi.string(),
-      github: joi.when('team', {
-        is: true,
-        then: joi.string().required(),
-        otherwise: joi.string(),
-      }),
-      blog: joi.string().uri(),
-      email: joi.string().email(),
-      trello: joi.string(),
-
-      team: joi.boolean().default(false),
-      core: joi.boolean().default(false),
-
-      translator: joi.boolean().default(false),
-      editor: joi.boolean().default(false),
-      developer: joi.boolean().default(false),
-      author: joi.boolean().default(false),
-
-      salary: joi.number(),
-
-      _id: joi.string().required(),
-      __v: joi.number(),
-    })
-    .required(),
-};
-
-const userPATCHValidation = {
-  body: joi
-    .object()
-    .keys({
-      name: joi.string(),
-
-      avatar: joi.string().uri(),
-      twitter: joi.string(),
-      github: joi.string(),
-      blog: joi.string().uri(),
-      email: joi.string().email(),
-      trello: joi.string(),
-
-      team: joi.boolean(),
-      core: joi.boolean(),
-
-      translator: joi.boolean(),
-      editor: joi.boolean(),
-      developer: joi.boolean(),
-      author: joi.boolean(),
-
-      salary: joi.number(),
-
-      _id: joi.string().required(),
-      __v: joi.number(),
-    })
-    .required(),
-};
-
-const ENV_PATH = resolve(__dirname, '../../.env');
+const ENV_PATH = resolve(__dirname, '../.env');
+dotenv.config({allowEmptyValues: false, path: ENV_PATH});
 const CONFIG_DIR = '../config/';
 const CONFIG_PATH = resolve(
   __dirname,
   `${CONFIG_DIR}application.${process.env.NODE_ENV || 'local'}.json`,
 );
-if (!fs.existsSync(ENV_PATH)) throw new Error('Envirnment files not found');
-dotenv.config({ path: ENV_PATH });
 
-if (!fs.existsSync(CONFIG_PATH)) throw new Error(`Config not found: ${CONFIG_PATH}`);
+if (!existsSync(CONFIG_PATH)) throw new Error(`Config not found: ${CONFIG_PATH}`);
 const config = require(CONFIG_PATH); // eslint-disable-line
 const { name, version } = require('../package.json');
 
@@ -382,7 +293,10 @@ server.opts('/', jwt(jwtOptions), async (req, res) => {
   mongoose.Promise = global.Promise;
   await mongoose.connect(
     `mongodb://${config.mongoDBHost}:${config.mongoDBPort}/${config.mongoDBName}`,
-    { useMongoClient: true },
+    {
+      useNewUrlParser: true,
+      useCreateIndex: true,
+    },
   );
   server.listen(PORT);
 })();
