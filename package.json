@@ -5,18 +5,15 @@
   "description": "Users Frontender Magazine",
   "keywords": [],
   "author": "Anton Nemtsev <thesilentimp@gmail.com>",
-  "contributors": [
-    {
-      "name": "Anton Nemtsev",
-      "email": "thesilentimp@gmail.com"
-    }
-  ],
+  "contributors": [{
+    "name": "Anton Nemtsev",
+    "email": "thesilentimp@gmail.com"
+  }],
   "license": "CC-BY-4.0",
   "main": "server.js",
   "scripts": {
     "lint": "npm run format && npm-run-all lint:*",
     "lint:js": "eslint ./source/** --ext .js --color -f stylish --fix",
-    "lint:doc": "documentation lint source/**/*.js*",
     "format": "prettier --write --single-quote --print-width 100 --trailing-comma all 'source/**/*.{js,jsx}'",
     "precommit": "git add . -A && lint-staged",
     "commitmsg": "commit-msg ${GIT_PARAMS}",
@@ -50,10 +47,13 @@
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.3",
     "@babel/plugin-proposal-export-namespace-from": "^7.2.0",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
     "@babel/plugin-syntax-export-default-from": "^7.2.0",
     "@babel/plugin-transform-runtime": "^7.2.0",
     "@babel/preset-env": "^7.3.1",
     "@plasma-platform/tm-message-hook": "^2.0.12",
+    "babel-eslint": "^10.0.1",
+    "documentation": "^9.1.1",
     "eslint": "^5.14.0",
     "eslint-config-airbnb": "^17.1.0",
     "eslint-config-prettier": "^4.0.0",
@@ -72,7 +72,6 @@
     "npm-run-all": "^4.1.5",
     "restify": "^7.7.0",
     "restify-cookies": "^0.2.5",
-    "restify-errors": "^6.1.1",
     "restify-joi-middleware": "^5.0.1",
     "restify-jwt-community": "^1.0.9"
   }
