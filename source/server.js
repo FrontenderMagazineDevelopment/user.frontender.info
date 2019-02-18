@@ -1,15 +1,26 @@
-import { existsSync } from 'fs';
+import {
+  existsSync
+} from 'fs';
 import mongoose from 'mongoose';
 import restify from 'restify';
 import jwt from 'restify-jwt-community';
 import validator from 'restify-joi-middleware';
 import cookieParser from 'restify-cookies';
 import dotenv from 'dotenv-safe';
-import { resolve } from 'path';
+import {
+  resolve
+} from 'path';
 
-import { user, users } from './routes';
+import {
+  user,
+  users
+} from './routes';
 
-import { userPATCHValidation, userPUTValidation, userPOSTValidation } from './validation';
+import {
+  userPATCHValidation,
+  userPUTValidation,
+  userPOSTValidation
+} from './validation';
 
 const ENV_PATH = resolve(__dirname, '../.env');
 dotenv.config({
@@ -25,7 +36,10 @@ const CONFIG_PATH = resolve(
 if (!existsSync(CONFIG_PATH)) throw new Error(`Config not found: ${CONFIG_PATH}`);
 const config = require(CONFIG_PATH); // eslint-disable-line
 process.env.config = config;
-const { name, version } = require('../package.json');
+const {
+  name,
+  version
+} = require('../package.json');
 
 const jwtOptions = {
   secret: process.env.JWT_SECRET,
@@ -64,15 +78,26 @@ server.pre((req, res, next) => {
   return next();
 });
 
-server.use(jwt(jwtOptions));
-// .unless({
-//   method: 'OPTIONS'
-// });
+server.use(jwt(jwtOptions).unless({
+  method: 'OPTIONS'
+}));
 
+// Users list
+
+/**
+ * OPTIONS for users entitie
+ */
 server.opts('/', users.opt);
+
+/**
+ * GET list of users
+ */
 server.get('/', users.get);
-server.post(
-  {
+
+/**
+ * Create new user
+ */
+server.post({
     path: '/',
     validation: userPOSTValidation,
   },
@@ -85,8 +110,7 @@ server.post(
  * Replace user by id
  * @type {String} id - user id
  */
-server.put(
-  {
+server.put({
     path: '/:id',
     validation: userPUTValidation,
   },
@@ -97,8 +121,7 @@ server.put(
  * Edit user by id
  * @type {String} id - user id
  */
-server.patch(
-  {
+server.patch({
     path: '/:id',
     validation: userPATCHValidation,
   },
@@ -117,13 +140,20 @@ server.get('/:id', user.get);
  * @type {String} - user id
  */
 server.del('/:id', user.del);
+
+/**
+ * OPTIONS for user entitie
+ * @type {String} - user id
+ */
 server.opts('/:id', user.opt);
 
+/**
+ * Connect to mongo db and start listen for connection
+ */
 (async () => {
   mongoose.Promise = global.Promise;
   await mongoose.connect(
-    `mongodb://${config.mongoDBHost}:${config.mongoDBPort}/${config.mongoDBName}`,
-    {
+    `mongodb://${config.mongoDBHost}:${config.mongoDBPort}/${config.mongoDBName}`, {
       useNewUrlParser: true,
       useCreateIndex: true,
     },
