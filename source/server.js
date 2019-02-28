@@ -4,11 +4,20 @@ import jwt from 'restify-jwt-community';
 import validator from 'restify-joi-middleware';
 import cookieParser from 'restify-cookies';
 import dotenv from 'dotenv';
-import { resolve } from 'path';
+import {
+  resolve
+} from 'path';
 
-import { user, users } from './routes';
+import {
+  user,
+  users
+} from './routes';
 
-import { userPATCHValidation, userPUTValidation, userPOSTValidation } from './validation';
+import {
+  userPATCHValidation,
+  userPUTValidation,
+  userPOSTValidation
+} from './validation';
 
 const ENV_PATH = resolve(__dirname, '../.env');
 dotenv.config({
