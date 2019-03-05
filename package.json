@@ -67,7 +67,7 @@
     "prettier": "^1.16.4"
   },
   "dependencies": {
-    "dotenv-safe": "^6.1.0",
+    "dotenv": "^6.2.0",
     "fs": "0.0.2",
     "joi": "^14.3.1",
     "mongoose": "^5.4.13",

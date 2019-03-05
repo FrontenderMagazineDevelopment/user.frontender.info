@@ -1,15 +1,10 @@
-import {
-  existsSync
-} from 'fs';
 import mongoose from 'mongoose';
 import restify from 'restify';
 import jwt from 'restify-jwt-community';
 import validator from 'restify-joi-middleware';
 import cookieParser from 'restify-cookies';
-import dotenv from 'dotenv-safe';
-import {
-  resolve
-} from 'path';
+import dotenv from 'dotenv';
+import { resolve } from 'path';
 
 import {
   user,
@@ -27,22 +22,23 @@ dotenv.config({
   allowEmptyValues: false,
   path: ENV_PATH,
 });
-const CONFIG_DIR = '../config/';
-const CONFIG_PATH = resolve(
-  __dirname,
-  `${CONFIG_DIR}application.${process.env.NODE_ENV || 'local'}.json`,
-);
 
-if (!existsSync(CONFIG_PATH)) throw new Error(`Config not found: ${CONFIG_PATH}`);
-const config = require(CONFIG_PATH); // eslint-disable-line
-process.env.config = config;
 const {
   name,
   version
 } = require('../package.json');
 
+const {
+  MONGODB_PORT,
+  MONGODB_HOST,
+  MONGODB_NAME,
+  JWT_SECRET,
+} = process.env;
+
+const PORT = process.env.PORT || 3055;
+
 const jwtOptions = {
-  secret: process.env.JWT_SECRET,
+  secret: JWT_SECRET,
   getToken: req => {
     if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
       return req.headers.authorization.split(' ')[1];
@@ -57,7 +53,6 @@ const jwtOptions = {
   },
 };
 
-const PORT = process.env.PORT || 3055;
 const server = restify.createServer({
   name,
   version,
@@ -153,7 +148,7 @@ server.opts('/:id', user.opt);
 (async () => {
   mongoose.Promise = global.Promise;
   await mongoose.connect(
-    `mongodb://${config.mongoDBHost}:${config.mongoDBPort}/${config.mongoDBName}`, {
+    `mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_NAME}`, {
       useNewUrlParser: true,
       useCreateIndex: true,
     },
