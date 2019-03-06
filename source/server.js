@@ -6,16 +6,9 @@ import cookieParser from 'restify-cookies';
 import dotenv from 'dotenv';
 import { resolve } from 'path';
 
-import {
-  user,
-  users
-} from './routes';
+import { user, users } from './routes';
 
-import {
-  userPATCHValidation,
-  userPUTValidation,
-  userPOSTValidation
-} from './validation';
+import { userPATCHValidation, userPUTValidation, userPOSTValidation } from './validation';
 
 const ENV_PATH = resolve(__dirname, '../.env');
 dotenv.config({
@@ -23,17 +16,9 @@ dotenv.config({
   path: ENV_PATH,
 });
 
-const {
-  name,
-  version
-} = require('../package.json');
+const { name, version } = require('../package.json');
 
-const {
-  MONGODB_PORT,
-  MONGODB_HOST,
-  MONGODB_NAME,
-  JWT_SECRET,
-} = process.env;
+const { MONGODB_PORT, MONGODB_HOST, MONGODB_NAME, JWT_SECRET } = process.env;
 
 const PORT = process.env.PORT || 3055;
 
@@ -73,9 +58,11 @@ server.pre((req, res, next) => {
   return next();
 });
 
-server.use(jwt(jwtOptions).unless({
-  method: 'OPTIONS'
-}));
+server.use(
+  jwt(jwtOptions).unless({
+    method: 'OPTIONS',
+  }),
+);
 
 // Users list
 
@@ -92,7 +79,8 @@ server.get('/', users.get);
 /**
  * Create new user
  */
-server.post({
+server.post(
+  {
     path: '/',
     validation: userPOSTValidation,
   },
@@ -105,7 +93,8 @@ server.post({
  * Replace user by id
  * @type {String} id - user id
  */
-server.put({
+server.put(
+  {
     path: '/:id',
     validation: userPUTValidation,
   },
@@ -116,7 +105,8 @@ server.put({
  * Edit user by id
  * @type {String} id - user id
  */
-server.patch({
+server.patch(
+  {
     path: '/:id',
     validation: userPATCHValidation,
   },
@@ -147,11 +137,9 @@ server.opts('/:id', user.opt);
  */
 (async () => {
   mongoose.Promise = global.Promise;
-  await mongoose.connect(
-    `mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_NAME}`, {
-      useNewUrlParser: true,
-      useCreateIndex: true,
-    },
-  );
+  await mongoose.connect(`mongodb://${MONGODB_HOST}:${MONGODB_PORT}/${MONGODB_NAME}`, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+  });
   server.listen(PORT);
 })();
