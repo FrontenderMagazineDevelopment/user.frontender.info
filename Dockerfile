@@ -12,16 +12,16 @@ COPY package-lock.json .
 #
 # ---- Dependencies ----
 FROM base AS dependencies
-# RUN apk add --no-cache make gcc g++ python
 RUN apk add --update python build-base
 # install node packages
-RUN npm install --only=prod--silent
+RUN npm install --only=prod --silent
 # copy production node_modules aside
 RUN cp -R node_modules prod_node_modules
 # install ALL node_modules, including 'devDependencies'
 RUN npm install --silent
 # Run in production mode
 
+# 
 # ---- Test & Build ----
 # run linters, setup and tests
 FROM dependencies AS build
