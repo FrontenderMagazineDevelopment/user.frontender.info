@@ -12,37 +12,36 @@ COPY package-lock.json .
 #
 # ---- Dependencies ----
 FROM base AS dependencies
-RUN apk add --update python2
-#RUN apk add --update python build-base
+# RUN apk add --no-cache make gcc g++ python
+RUN apk add --update python build-base
 # install node packages
-#RUN yarn install --production --no-progress
+RUN npm install --production --silent
 # copy production node_modules aside
-#RUN cp -R node_modules prod_node_modules
+RUN cp -R node_modules prod_node_modules
 ENV NODE_ENV=production
 # install ALL node_modules, including 'devDependencies'
-RUN npm install --no-progress
+RUN npm install --silent
 # Run in production mode
-
 #
 # ---- Test & Build ----
 # run linters, setup and tests
-FROM dependencies AS build
-COPY . .
-# Setup environment variables
-ENV NODE_ENV=production
-RUN npm run build
+# FROM dependencies AS build
+# COPY . .
+# # Setup environment variables
+# ENV NODE_ENV=production
+# RUN npm run build
 
-#
-# ---- Release ----
-FROM base AS release
-RUN apk add --update bash && rm -rf /var/cache/apk/*
-# copy production node_modules
-COPY --from=dependencies /var/app/node_modules ./node_modules
-COPY --from=build /var/app/build ./build
-COPY --from=build /var/app/source ./source
+# #
+# # ---- Release ----
+# FROM base AS release
+# RUN apk add --update bash && rm -rf /var/cache/apk/*
+# # copy production node_modules
+# COPY --from=dependencies /var/app/node_modules ./node_modules
+# COPY --from=build /var/app/build ./build
+# COPY --from=build /var/app/source ./source
 
-# Setup environment variables
-ENV NODE_ENV=production
-# expose port and define CMD
-EXPOSE 4000
-CMD npm run start
+# # Setup environment variables
+# ENV NODE_ENV=production
+# # expose port and define CMD
+# EXPOSE 4000
+# CMD npm run start
