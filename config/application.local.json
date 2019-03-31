@@ -1,7 +1,0 @@
-{
-  "collectionName": "users",
-  "mongoDBHost": "localhost",
-  "mongoDBPort": 27017,
-  "mongoDBName": "fm",
-  "domain": "http://localhost:3040/"
-}
